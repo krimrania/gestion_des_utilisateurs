@@ -2,64 +2,69 @@ import 'package:flutter/material.dart';
 import 'package:gestion_des_utilisateurs/mod%C3%A8le/User.dart';
 import 'package:gestion_des_utilisateurs/services/UserService.dart';
 
-class ViewUsers extends StatefulWidget {
+class ViewUsersScreen extends StatefulWidget {
+  const ViewUsersScreen({Key? key}) : super(key: key);
+
   @override
-  _ViewUsersState createState() => _ViewUsersState();
+  _ViewUsersScreenState createState() => _ViewUsersScreenState();
 }
 
-class _ViewUsersState extends State<ViewUsers> {
+class _ViewUsersScreenState extends State<ViewUsersScreen> {
   final UserService _userService = UserService();
-  List<User> _users = [];
+  late Future<List<User>> _futureUsers;
 
   @override
   void initState() {
     super.initState();
-    _loadUsers();
+    _futureUsers = _loadUsers();
   }
 
-  _loadUsers() async {
-    var users = await _userService.readAllUsers();
-    setState(() {
-      _users = users.map<User>((data) {
-        return User(
-          id: data['id'],
-          name: data['name'],
-          contact: data['contact'],
-          description: data['description'],
-        );
-      }).toList();
-    });
+  Future<List<User>> _loadUsers() async {
+    return _userService.readAllUsers();
   }
 
-  _deleteUser(int userId) async {
+  void _deleteUser(int userId) async {
     await _userService.deleteUser(userId);
-    _loadUsers();
+    setState(() {
+      _futureUsers = _loadUsers();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold 
-    (
+    return Scaffold(
       appBar: AppBar(
         title: Text('Liste des Utilisateurs'),
       ),
-      body: ListView.builder(
-        itemCount: _users.length,
-        itemBuilder: (context, index) {
-          User user = _users[index];
-          return ListTile(
-            title: Text(user.name!),
-            subtitle: Text(user.contact!),
-            trailing: IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                _deleteUser(user.id!);
+      body: FutureBuilder<List<User>>(
+        future: _futureUsers,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Une erreur s\'est produite.'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('Aucun utilisateur trouvé.'));
+          } else {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                User user = snapshot.data![index];
+                return ListTile(
+                  title: Text(user.name!),
+                  subtitle: Text(user.contact!),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      _deleteUser(user.id!);
+                    },
+                  ),
+                );
               },
-            ),
-          );
+            );
+          }
         },
       ),
     );
   }
 }
-

@@ -1,37 +1,82 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_des_utilisateurs/screens/AddUser.dart';
-import 'package:gestion_des_utilisateurs/screens/ViewUsers.dart';
+import 'package:gestion_des_utilisateurs/db_helper/repository.dart';
+import 'package:gestion_des_utilisateurs/mod%C3%A8le/User.dart';
 
-class Home extends StatelessWidget {
+class EditUser extends StatefulWidget {
+  final User user;
+
+  EditUser({required this.user});
+
+  @override
+  _EditUserState createState() => _EditUserState();
+}
+
+class _EditUserState extends State<EditUser> {
+  late TextEditingController _nameController;
+  late TextEditingController _contactController;
+  late TextEditingController _descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.user.name);
+    _contactController = TextEditingController(text: widget.user.contact);
+    _descriptionController = TextEditingController(text: widget.user.description);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _contactController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  void _updateUser() {
+    User updatedUser = User(
+      id: widget.user.id,
+      name: _nameController.text,
+      contact: _contactController.text,
+      description: _descriptionController.text,
+    );
+
+    Repository().updateData('users', updatedUser.toMap());
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Gestion des Utilisateurs'),
+        title: Text('Edit User'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              child: Text('Ajouter un Utilisateur'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddUser()),
-                );
-              },
-            ),
-            ElevatedButton(
-              child: Text('Voir les Utilisateurs'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ViewUsers()),
-                );
-              },
-            ),
-          ],
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Name'),
+              ),
+              SizedBox(height: 16.0),
+              TextFormField(
+                controller: _contactController,
+                decoration: InputDecoration(labelText: 'Contact'),
+              ),
+              SizedBox(height: 16.0),
+              TextFormField(
+                controller: _descriptionController,
+                decoration: InputDecoration(labelText: 'Description'),
+              ),
+              SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _updateUser,
+                child: Text('Save Changes'),
+              ),
+            ],
+          ),
         ),
       ),
     );

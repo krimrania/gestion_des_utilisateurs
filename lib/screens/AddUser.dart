@@ -2,19 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:gestion_des_utilisateurs/mod%C3%A8le/User.dart';
 import 'package:gestion_des_utilisateurs/services/UserService.dart';
 
-class AddUser extends StatefulWidget {
-  @override
-  _AddUserState createState() => _AddUserState();
-}
-
-class _AddUserState extends State<AddUser> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _contactController = TextEditingController();
-  final _descriptionController = TextEditingController();
+class AddUser extends StatelessWidget {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _contactController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   final UserService _userService = UserService();
 
-  _saveUser() async {
+  void _saveUser(BuildContext context) async {
     User user = User(
       name: _nameController.text,
       contact: _contactController.text,
@@ -32,45 +26,50 @@ class _AddUserState extends State<AddUser> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: 'Nom'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un nom';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _contactController,
-                decoration: InputDecoration(labelText: 'Contact'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un contact';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _saveUser();
-                  }
-                },
-                child: Text('Enregistrer'),
-              ),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextFormField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Nom'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez entrer un nom';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              controller: _contactController,
+              decoration: InputDecoration(labelText: 'Contact'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez entrer un contact';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              controller: _descriptionController,
+              decoration: InputDecoration(labelText: 'Description'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                if (_nameController.text.isNotEmpty &&
+                    _contactController.text.isNotEmpty) {
+                  _saveUser(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Veuillez remplir tous les champs'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Enregistrer'),
+            ),
+          ],
         ),
       ),
     );

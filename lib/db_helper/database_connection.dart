@@ -13,7 +13,16 @@ class DatabaseConnection {
   }
 
   Future<void> _createDatabase(Database database, int version) async {
-    String sql = "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, contact TEXT, description TEXT);";
-    await database.execute(sql);
+     await database.execute('''
+    CREATE TABLE users (
+      id INTEGER PRIMARY KEY,
+       name TEXT,
+       contact TEXT,
+        description TEXT
+        )
+        ''');
+    
   }
+   // ignore: recursive_getters
+   Database get database => database;
 }

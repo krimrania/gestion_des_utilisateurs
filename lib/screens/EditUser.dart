@@ -32,7 +32,7 @@ class _EditUserState extends State<EditUser> {
     super.dispose();
   }
 
-  _updateUser() {
+  void _updateUser() {
     User updatedUser = User(
       id: widget.user.id,
       name: _nameController.text,
