@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_des_utilisateurs/db_helper/repository.dart';
-import 'package:gestion_des_utilisateurs/db_helper/database_connection.dart';
 import 'package:gestion_des_utilisateurs/mod%C3%A8le/User.dart';
 
 class EditUser extends StatefulWidget {
@@ -13,13 +12,9 @@ class EditUser extends StatefulWidget {
 }
 
 class _EditUserState extends State<EditUser> {
-  final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _contactController;
   late TextEditingController _descriptionController;
-
-  // Création d'une instance de Repository avec DatabaseConnection
-  final Repository _repository = Repository(DatabaseConnection());
 
   @override
   void initState() {
@@ -30,64 +25,56 @@ class _EditUserState extends State<EditUser> {
   }
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _contactController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  _updateUser() {
+    User updatedUser = User(
+      id: widget.user.id,
+      name: _nameController.text,
+      contact: _contactController.text,
+      description: _descriptionController.text,
+    );
+
+    Repository().updateData('users', updatedUser.toMap());
+    Navigator.pop(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Éditer un utilisateur'),
+        title: Text('Edit User'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: 'Nom'),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Veuillez entrer un nom';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _contactController,
-                decoration: InputDecoration(labelText: 'Contact'),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Veuillez entrer un contact';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Veuillez entrer une description';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _repository.updateData('users', {
-                      'id': widget.user.id,
-                      'name': _nameController.text,
-                      'contact': _contactController.text,
-                      'description': _descriptionController.text,
-                    });
-                    Navigator.pop(context);
-                  }
-                },
-                child: Text('Mettre à jour'),
-              ),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+            SizedBox(height: 16.0),
+            TextField(
+              controller: _contactController,
+              decoration: InputDecoration(labelText: 'Contact'),
+            ),
+            SizedBox(height: 16.0),
+            TextField(
+              controller: _descriptionController,
+              decoration: InputDecoration(labelText: 'Description'),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: _updateUser,
+              child: Text('Save Changes'),
+            ),
+          ],
         ),
       ),
     );

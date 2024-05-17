@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/home.dart'; // Importez votre écran principal
+import 'package:gestion_des_utilisateurs/screens/home.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,12 +10,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Gestion des Utilisateurs',
+      title: 'User Management App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: Home(), // Définissez votre écran principal ici
+      home: Home(),
     );
   }
 }

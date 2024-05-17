@@ -1,15 +1,10 @@
 class User {
-  final int? id;
-  final String name;
-  final String contact;
-  final String description;
+  int? id;
+  String? name;
+  String? contact;
+  String? description;
 
-  User({
-    this.id,
-    required this.name,
-    required this.contact,
-    required this.description,
-  });
+  User({this.id, this.name, this.contact, this.description});
 
   Map<String, dynamic> toMap() {
     return {
@@ -18,18 +13,5 @@ class User {
       'contact': contact,
       'description': description,
     };
-  }
-
-  static Future<User?> fromMap(Map<String, dynamic> userMap) async {
-    if (userMap.isNotEmpty) {
-      return User(
-        id: userMap['id'],
-        name: userMap['name'],
-        contact: userMap['contact'],
-        description: userMap['description'],
-      );
-    } else {
-      return null;
-    }
   }
 }

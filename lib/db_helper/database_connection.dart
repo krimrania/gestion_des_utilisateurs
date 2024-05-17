@@ -1,26 +1,19 @@
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+// ignore: depend_on_referenced_packages
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class DatabaseConnection {
-  static Database? _database;
+  Future<Database> setDatabase() async {
+    Directory directory = await getApplicationDocumentsDirectory();
+    String path = join(directory.path, 'db_crud.db');
+    var database = await openDatabase(path, version: 1, onCreate: _createDatabase);
+    return database;
+  }
 
-  Future<Database?> get database async {
-    if (_database != null) return _database;
-
-    _database = await openDatabase(
-      'app_database.db',
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE users (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            contact TEXT,
-            description TEXT
-          )
-        ''');
-      },
-    );
-
-    return _database;
+  Future<void> _createDatabase(Database database, int version) async {
+    String sql = "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, contact TEXT, description TEXT);";
+    await database.execute(sql);
   }
 }

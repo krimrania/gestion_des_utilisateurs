@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_des_utilisateurs/mod%C3%A8le/User.dart';
-import 'package:gestion_des_utilisateurs/screens/AddUser.dart';
-import 'package:gestion_des_utilisateurs/screens/EditUser.dart';
 import 'package:gestion_des_utilisateurs/services/UserService.dart';
 
 class ViewUsers extends StatefulWidget {
@@ -11,88 +9,57 @@ class ViewUsers extends StatefulWidget {
 
 class _ViewUsersState extends State<ViewUsers> {
   final UserService _userService = UserService();
-  late Future<List<User>> _userList;
+  List<User> _users = [];
 
   @override
   void initState() {
     super.initState();
-    _userList = _userService.getUsers() as Future<List<User>>;
+    _loadUsers();
+  }
+
+  _loadUsers() async {
+    var users = await _userService.readAllUsers();
+    setState(() {
+      _users = users.map<User>((data) {
+        return User(
+          id: data['id'],
+          name: data['name'],
+          contact: data['contact'],
+          description: data['description'],
+        );
+      }).toList();
+    });
+  }
+
+  _deleteUser(int userId) async {
+    await _userService.deleteUser(userId);
+    _loadUsers();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold 
+    (
       appBar: AppBar(
-        title: Text('Liste des utilisateurs'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AddUser()),
-              ).then((value) {
-                setState(() {
-                  _userList = _userService.getUsers() as Future<List<User>>;
-                });
-              });
-            },
-          ),
-        ],
+        title: Text('Liste des Utilisateurs'),
       ),
-      body: FutureBuilder<List<User>>(
-        future: _userList,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Erreur: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Aucun utilisateur trouvé.'));
-          } else {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                User user = snapshot.data![index];
-                return ListTile(
-                  title: Text(user.name),
-                  subtitle: Text(user.contact),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditUser(user: user),
-                            ),
-                          ).then((value) {
-                            setState(() {
-                              _userList = _userService.getUsers() as Future<List<User>>;
-                            });
-                          });
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          _userService.deleteUserById(user.id!).then((_) {
-                            setState(() {
-                              _userList = _userService.getUsers() as Future<List<User>>;
-                            });
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                );
+      body: ListView.builder(
+        itemCount: _users.length,
+        itemBuilder: (context, index) {
+          User user = _users[index];
+          return ListTile(
+            title: Text(user.name!),
+            subtitle: Text(user.contact!),
+            trailing: IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                _deleteUser(user.id!);
               },
-            );
-          }
+            ),
+          );
         },
       ),
     );
   }
 }
+

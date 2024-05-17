@@ -1,67 +1,38 @@
-import 'package:sqflite/sqflite.dart';
 import 'database_connection.dart';
+import 'package:sqflite/sqflite.dart';
 
 class Repository {
   late DatabaseConnection _databaseConnection;
 
-  static Database? _database;
-
-  Repository(DatabaseConnection databaseConnection) {
-    // Initialize the database connection
+  Repository() {
     _databaseConnection = DatabaseConnection();
   }
 
+  static Database? _database;
+
   Future<Database?> get database async {
     if (_database != null) return _database;
-
-    _database = await _databaseConnection.database;
+    _database = await _databaseConnection.setDatabase();
     return _database;
   }
 
-  // Insert data into the table
-  Future<void> insertData(String table, Map<String, dynamic> data) async {
-    final db = await database;
-    await db!.insert(table, data);
+  Future<int> insertData(String table, Map<String, dynamic> data) async {
+    var connection = await database;
+    return await connection!.insert(table, data);
   }
 
-  // Read all data from the table
   Future<List<Map<String, dynamic>>> readData(String table) async {
-    final db = await database;
-    return await db!.query(table);
+    var connection = await database;
+    return await connection!.query(table);
   }
 
-  // Read data by ID
-  Future<Map<String, dynamic>?> readDataById(String table, int itemId) async {
-    final db = await database;
-    List<Map<String, dynamic>> result = await db!.query(
-      table,
-      where: 'id = ?',
-      whereArgs: [itemId],
-    );
-    if (result.isNotEmpty) {
-      return result.first;
-    }
-    return null;
+  Future<int> updateData(String table, Map<String, dynamic> data) async {
+    var connection = await database;
+    return await connection!.update(table, data, where: 'id = ?', whereArgs: [data['id']]);
   }
 
-  // Update data
-  Future<void> updateData(String table, Map<String, dynamic> data) async {
-    final db = await database;
-    await db!.update(
-      table,
-      data,
-      where: 'id = ?',
-      whereArgs: [data['id']],
-    );
-  }
-
-  // Delete data by ID
-  Future<void> deleteDataById(String table, int itemId) async {
-    final db = await database;
-    await db!.delete(
-      table,
-      where: 'id = ?',
-      whereArgs: [itemId],
-    );
+  Future<int> deleteData(String table, int id) async {
+    var connection = await database;
+    return await connection!.delete(table, where: 'id = ?', whereArgs: [id]);
   }
 }

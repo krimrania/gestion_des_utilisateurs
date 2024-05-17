@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_des_utilisateurs/db_helper/repository.dart';
-import 'package:gestion_des_utilisateurs/db_helper/database_connection.dart';
+import 'package:gestion_des_utilisateurs/mod%C3%A8le/User.dart';
+import 'package:gestion_des_utilisateurs/services/UserService.dart';
 
 class AddUser extends StatefulWidget {
   @override
@@ -12,27 +12,35 @@ class _AddUserState extends State<AddUser> {
   final _nameController = TextEditingController();
   final _contactController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final UserService _userService = UserService();
 
-  // Instanciation de Repository avec DatabaseConnection
-  final Repository _repository = Repository(DatabaseConnection());
+  _saveUser() async {
+    User user = User(
+      name: _nameController.text,
+      contact: _contactController.text,
+      description: _descriptionController.text,
+    );
+    await _userService.saveUser(user);
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ajouter un utilisateur'),
+        title: Text('Ajouter un Utilisateur'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
-            children: <Widget>[
+            children: [
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(labelText: 'Nom'),
                 validator: (value) {
-                  if (value!.isEmpty) {
+                  if (value == null || value.isEmpty) {
                     return 'Veuillez entrer un nom';
                   }
                   return null;
@@ -42,7 +50,7 @@ class _AddUserState extends State<AddUser> {
                 controller: _contactController,
                 decoration: InputDecoration(labelText: 'Contact'),
                 validator: (value) {
-                  if (value!.isEmpty) {
+                  if (value == null || value.isEmpty) {
                     return 'Veuillez entrer un contact';
                   }
                   return null;
@@ -51,26 +59,15 @@ class _AddUserState extends State<AddUser> {
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(labelText: 'Description'),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Veuillez entrer une description';
-                  }
-                  return null;
-                },
               ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    _repository.insertData('users', {
-                      'name': _nameController.text,
-                      'contact': _contactController.text,
-                      'description': _descriptionController.text,
-                    });
-                    Navigator.pop(context);
+                    _saveUser();
                   }
                 },
-                child: Text('Ajouter'),
+                child: Text('Enregistrer'),
               ),
             ],
           ),
