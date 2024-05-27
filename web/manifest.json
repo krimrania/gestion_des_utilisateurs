@@ -1,6 +1,6 @@
 {
-    "name": "gestion_des_utilisateurs",
-    "short_name": "gestion_des_utilisateurs",
+    "name": "liste_elements",
+    "short_name": "liste_elements",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
